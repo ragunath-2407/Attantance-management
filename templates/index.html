@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Attendance Management System - College Academic Portal</title>
+  <meta name="description" content="Complete college CRUD-based digital attendance management system.">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+  <!-- ==============================================================
+       1. LOGIN VIEW (Shown when user is not authenticated)
+       ============================================================== -->
+  <div id="view-login" class="login-view-wrapper">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-icon-crest">🎓</div>
+        <h1 class="login-title" id="login-college-name">Apex Institute of Technology</h1>
+        <p class="login-sub">Attendance Management Portal</p>
+      </div>
+
+      <form id="form-login" onsubmit="handleLogin(event)">
+        <div class="form-group" style="margin-bottom: 16px;">
+          <label class="form-label" for="login-username">Username or Faculty ID</label>
+          <input type="text" id="login-username" class="form-input" placeholder="e.g. admin" value="admin" required autocomplete="username">
+        </div>
+
+        <div class="form-group" style="margin-bottom: 24px;">
+          <label class="form-label" for="login-password">Password</label>
+          <input type="password" id="login-password" class="form-input" placeholder="••••••••" value="admin123" required autocomplete="current-password">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 15px;">
+          Sign In to Portal
+        </button>
+
+        <div class="login-hint-box">
+          <strong>Demo Login Credentials:</strong><br>
+          • Admin Account: <code>admin</code> / <code>admin123</code><br>
+          • Faculty Account: <code>faculty</code> / <code>faculty123</code>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       AUTHENTICATED APPLICATION LAYOUT
+       ============================================================== -->
+  <div id="app-portal-layout" class="app-container" style="display: none;">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="sidebar" id="app-sidebar">
+      <div class="sidebar-header">
+        <div class="college-logo-icon">🎓</div>
+        <div class="college-brand-text">
+          <div class="college-brand-title" id="sidebar-college-name">Apex Institute</div>
+          <div class="college-brand-sub">Attendance System</div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-label">Main Navigation</div>
+
+        <div class="nav-link active" id="nav-dashboard" onclick="navigateTo('dashboard')">
+          <span class="nav-icon">📊</span>
+          <span>Dashboard</span>
+        </div>
+
+        <div class="nav-link" id="nav-students" onclick="navigateTo('students')">
+          <span class="nav-icon">👨‍🎓</span>
+          <span>Students</span>
+        </div>
+
+        <div class="nav-link" id="nav-subjects" onclick="navigateTo('subjects')">
+          <span class="nav-icon">📚</span>
+          <span>Subjects</span>
+        </div>
+
+        <div class="nav-link" id="nav-attendance" onclick="navigateTo('attendance')">
+          <span class="nav-icon">📅</span>
+          <span>Attendance</span>
+        </div>
+
+        <div class="nav-link" id="nav-reports" onclick="navigateTo('reports')">
+          <span class="nav-icon">📈</span>
+          <span>Reports & Shortage</span>
+        </div>
+
+        <div class="nav-section-label">System</div>
+
+        <div class="nav-link" id="nav-settings" onclick="navigateTo('settings')">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </div>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="user-badge-card">
+          <div class="user-avatar-circle" id="sidebar-user-avatar">AD</div>
+          <div style="overflow: hidden;">
+            <div class="user-meta-name" id="sidebar-user-name">Dr. Robert Jenkins</div>
+            <div class="user-meta-role" id="sidebar-user-role">Administrator</div>
+          </div>
+        </div>
+        <button class="btn-logout" onclick="handleLogout()">
+          <span>🚪</span>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT & TOPBAR -->
+    <div class="main-wrapper">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle-btn" onclick="toggleMobileSidebar()" aria-label="Toggle Menu">
+            ☰
+          </button>
+          <div class="page-title-wrap">
+            <h1 class="page-title" id="page-heading-title">Dashboard</h1>
+            <span class="page-subtitle" id="page-heading-sub">Overview & Academic Statistics</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <div class="topbar-date-badge">
+            <span>🗓️</span>
+            <span id="current-date-display">Today</span>
+          </div>
+          <button class="quick-action-btn" onclick="navigateTo('mark-attendance')">
+            <span>✏️</span>
+            <span>Mark Attendance</span>
+          </button>
+        </div>
+      </header>
+
+      <main class="page-content">
+
+        <!-- ==============================================================
+             PAGE 2: DASHBOARD
+             ============================================================== -->
+        <div id="view-dashboard" class="view-container active">
+          <!-- Metrics Grid -->
+          <div class="metrics-grid">
+            <div class="metric-card students">
+              <div class="metric-info">
+                <span class="metric-label">Total Students</span>
+                <span class="metric-value" id="dash-total-students">0</span>
+                <span class="metric-sub">Across 4 Departments</span>
+              </div>
+              <div class="metric-icon-wrap">👨‍🎓</div>
+            </div>
+
+            <div class="metric-card subjects">
+              <div class="metric-info">
+                <span class="metric-label">Total Subjects</span>
+                <span class="metric-value" id="dash-total-subjects">0</span>
+                <span class="metric-sub">Active Curriculum</span>
+              </div>
+              <div class="metric-icon-wrap">📚</div>
+            </div>
+
+            <div class="metric-card attendance">
+              <div class="metric-info">
+                <span class="metric-label">Avg Attendance Rate</span>
+                <span class="metric-value" id="dash-overall-pct">0%</span>
+                <span class="metric-sub" id="dash-attendance-breakdown">0 Present</span>
+              </div>
+              <div class="metric-icon-wrap">✅</div>
+            </div>
+
+            <div class="metric-card shortage">
+              <div class="metric-info">
+                <span class="metric-label">Shortage Alert (&lt;75%)</span>
+                <span class="metric-value" id="dash-shortage-count">0</span>
+                <span class="metric-sub">At-risk for Exams</span>
+              </div>
+              <div class="metric-icon-wrap">⚠️</div>
+            </div>
+          </div>
+
+          <!-- Dashboard Columns -->
+          <div class="dashboard-columns">
+            <!-- Left: Recent Attendance Logs -->
+            <div class="card-panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">📋 Recent Attendance Sessions</h2>
+                  <span class="panel-subtitle">Latest recorded class sessions</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="navigateTo('attendance-history')">
+                  View Full History →
+                </button>
+              </div>
+              <div class="table-responsive">
+                <table class="custom-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Student</th>
+                      <th>Subject</th>
+                      <th>Status</th>
+                      <th>Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dash-recent-table-body">
+                    <tr><td colspan="5" style="text-align: center; color: var(--text-muted); padding: 24px;">Loading recent sessions...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Right: Low Attendance Warnings (<75%) -->
+            <div class="card-panel">
+              <div class="panel-header">
+                <div>
+                  <h2 class="panel-title">⚠️ Defaulters (&lt;75%)</h2>
+                  <span class="panel-subtitle">Requires immediate counseling</span>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="navigateTo('reports')">
+                  Reports
+                </button>
+              </div>
+              <div class="panel-body no-padding">
+                <div class="table-responsive">
+                  <table class="custom-table">
+                    <thead>
+                      <tr>
+                        <th>Student</th>
+                        <th>Dept</th>
+                        <th>Rate</th>
+                      </tr>
+                    </thead>
+                    <tbody id="dash-shortage-table-body">
+                      <tr><td colspan="3" style="text-align: center; color: var(--text-muted); padding: 24px;">No students below 75%.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Action Buttons Row -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h2 class="panel-title">⚡ Quick Management Shortcuts</h2>
+            </div>
+            <div class="panel-body">
+              <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <button class="btn btn-primary" onclick="navigateTo('mark-attendance')">
+                  <span>✏️</span> Take Class Attendance
+                </button>
+                <button class="btn btn-secondary" onclick="navigateTo('add-student')">
+                  <span>➕</span> Register New Student
+                </button>
+                <button class="btn btn-secondary" onclick="navigateTo('add-subject')">
+                  <span>📖</span> Create New Subject
+                </button>
+                <button class="btn btn-secondary" onclick="navigateTo('reports')">
+                  <span>📊</span> Generate Attendance Report
+                </button>
+                <button class="btn btn-secondary" onclick="navigateTo('attendance-history')">
+                  <span>🕒</span> View Session Logs
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 3: STUDENTS LIST
+             ============================================================== -->
+        <div id="view-students" class="view-container">
+          <div class="controls-bar">
+            <div class="controls-left">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="students-search" placeholder="Search by name, roll no, email..." oninput="debounce(loadStudents, 300)()">
+              </div>
+              <select id="students-filter-dept" class="filter-select" onchange="loadStudents()">
+                <option value="All">All Departments</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Electronics & Comm.">Electronics & Comm.</option>
+                <option value="Mechanical Eng.">Mechanical Eng.</option>
+              </select>
+              <select id="students-filter-year" class="filter-select" onchange="loadStudents()">
+                <option value="All">All Years</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="navigateTo('add-student')">
+              <span>➕</span> Add New Student
+            </button>
+          </div>
+
+          <div class="card-panel">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Student Name & Reg No</th>
+                    <th>Department</th>
+                    <th>Year / Sem</th>
+                    <th>Sec</th>
+                    <th>Contact</th>
+                    <th>Attendance %</th>
+                    <th style="text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="students-table-body">
+                  <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">Loading students...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 4: ADD STUDENT
+             ============================================================== -->
+        <div id="view-add-student" class="view-container">
+          <div class="form-card">
+            <div class="form-header-bar">
+              <div>
+                <h2 class="form-header-title">Register New Student</h2>
+                <p class="form-help-text">Enter student academic and personal credentials for college database.</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="navigateTo('students')">← Back to Students</button>
+            </div>
+
+            <form id="form-add-student" onsubmit="handleCreateStudent(event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="add-student-regno">Register / Roll Number <span class="required-star">*</span></label>
+                  <input type="text" id="add-student-regno" class="form-input" placeholder="e.g. CS2025001" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-name">Full Name <span class="required-star">*</span></label>
+                  <input type="text" id="add-student-name" class="form-input" placeholder="e.g. Liam Gallagher" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-email">Email Address <span class="required-star">*</span></label>
+                  <input type="email" id="add-student-email" class="form-input" placeholder="student@college.edu" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-phone">Phone Number</label>
+                  <input type="tel" id="add-student-phone" class="form-input" placeholder="+1 (555) 000-0000">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-dept">Department <span class="required-star">*</span></label>
+                  <select id="add-student-dept" class="form-select" required>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Electronics & Comm.">Electronics & Comm.</option>
+                    <option value="Mechanical Eng.">Mechanical Eng.</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-year">Year of Study <span class="required-star">*</span></label>
+                  <select id="add-student-year" class="form-select" required>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3" selected>3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-sem">Semester <span class="required-star">*</span></label>
+                  <select id="add-student-sem" class="form-select" required>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5" selected>Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-section">Section</label>
+                  <input type="text" id="add-student-section" class="form-input" placeholder="A, B, or C" value="A">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-gender">Gender</label>
+                  <select id="add-student-gender" class="form-select">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-student-dob">Date of Birth</label>
+                  <input type="date" id="add-student-dob" class="form-input">
+                </div>
+
+                <div class="form-group col-span-2">
+                  <label class="form-label" for="add-student-address">Residential Address</label>
+                  <textarea id="add-student-address" class="form-textarea" placeholder="Street, City, State, ZIP"></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="navigateTo('students')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Student</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 5: EDIT STUDENT
+             ============================================================== -->
+        <div id="view-edit-student" class="view-container">
+          <div class="form-card">
+            <div class="form-header-bar">
+              <div>
+                <h2 class="form-header-title">Edit Student Details</h2>
+                <p class="form-help-text">Update existing student credentials and academic enrollment.</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="navigateTo('students')">← Back to Students</button>
+            </div>
+
+            <form id="form-edit-student" onsubmit="handleUpdateStudent(event)">
+              <input type="hidden" id="edit-student-id">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-regno">Register Number <span class="required-star">*</span></label>
+                  <input type="text" id="edit-student-regno" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-name">Full Name <span class="required-star">*</span></label>
+                  <input type="text" id="edit-student-name" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-email">Email Address <span class="required-star">*</span></label>
+                  <input type="email" id="edit-student-email" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-phone">Phone Number</label>
+                  <input type="tel" id="edit-student-phone" class="form-input">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-dept">Department <span class="required-star">*</span></label>
+                  <select id="edit-student-dept" class="form-select" required>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Electronics & Comm.">Electronics & Comm.</option>
+                    <option value="Mechanical Eng.">Mechanical Eng.</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-year">Year of Study <span class="required-star">*</span></label>
+                  <select id="edit-student-year" class="form-select" required>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-sem">Semester <span class="required-star">*</span></label>
+                  <select id="edit-student-sem" class="form-select" required>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-section">Section</label>
+                  <input type="text" id="edit-student-section" class="form-input">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-gender">Gender</label>
+                  <select id="edit-student-gender" class="form-select">
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                    <option value="Other">Other</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-student-dob">Date of Birth</label>
+                  <input type="date" id="edit-student-dob" class="form-input">
+                </div>
+
+                <div class="form-group col-span-2">
+                  <label class="form-label" for="edit-student-address">Address</label>
+                  <textarea id="edit-student-address" class="form-textarea"></textarea>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="navigateTo('students')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Student Details</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 6: STUDENT DETAILS PROFILE
+             ============================================================== -->
+        <div id="view-student-details" class="view-container">
+          <div style="margin-bottom: 16px;">
+            <button class="btn btn-secondary btn-sm" onclick="navigateTo('students')">← Back to All Students</button>
+          </div>
+
+          <!-- Profile Overview Header -->
+          <div class="profile-overview-card">
+            <div class="profile-avatar-large" id="detail-student-avatar">ST</div>
+            <div class="profile-info">
+              <h2 class="profile-name" id="detail-student-name">Student Name</h2>
+              <div class="profile-reg" id="detail-student-reg">REG NO: CS2025000</div>
+              <div class="profile-tags">
+                <span class="badge badge-department" id="detail-student-dept">Computer Science</span>
+                <span class="badge badge-department" id="detail-student-year-sem">Year 3 • Semester 5</span>
+                <span class="badge badge-department" id="detail-student-sec">Section A</span>
+                <span class="badge" id="detail-student-eligibility-badge">Status</span>
+              </div>
+              <div style="margin-top: 10px; font-size: 13px; color: var(--text-muted);" id="detail-student-contact">
+                ✉️ email@college.edu • 📞 +1 555-0000
+              </div>
+            </div>
+
+            <div class="profile-stats-grid">
+              <div class="profile-stat-box">
+                <div class="profile-stat-num" id="detail-stat-pct" style="color: var(--primary);">0%</div>
+                <div class="profile-stat-label">Attendance Rate</div>
+              </div>
+              <div class="profile-stat-box">
+                <div class="profile-stat-num" id="detail-stat-present" style="color: var(--success);">0</div>
+                <div class="profile-stat-label">Attended</div>
+              </div>
+              <div class="profile-stat-box">
+                <div class="profile-stat-num" id="detail-stat-absent" style="color: var(--danger);">0</div>
+                <div class="profile-stat-label">Missed</div>
+              </div>
+              <div class="profile-stat-box">
+                <div class="profile-stat-num" id="detail-stat-total">0</div>
+                <div class="profile-stat-label">Total Classes</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Subject-wise Breakdown Table -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">📚 Enrolled Subjects & Attendance Breakdown</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Subject Code & Name</th>
+                    <th>Faculty In-Charge</th>
+                    <th>Conducted</th>
+                    <th>Attended</th>
+                    <th>Absent</th>
+                    <th>Percentage</th>
+                    <th>Exam Eligibility</th>
+                  </tr>
+                </thead>
+                <tbody id="detail-subjects-table-body">
+                  <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 24px;">No subject data found.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Student's Personal Attendance Session Logs -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <h3 class="panel-title">🕒 Class Session History for this Student</h3>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Subject</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody id="detail-history-table-body">
+                  <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">No attendance history recorded yet.</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 7: SUBJECTS LIST
+             ============================================================== -->
+        <div id="view-subjects" class="view-container">
+          <div class="controls-bar">
+            <div class="controls-left">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="subjects-search" placeholder="Search subject code, title, faculty..." oninput="debounce(loadSubjects, 300)()">
+              </div>
+              <select id="subjects-filter-dept" class="filter-select" onchange="loadSubjects()">
+                <option value="All">All Departments</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Electronics & Comm.">Electronics & Comm.</option>
+                <option value="Mechanical Eng.">Mechanical Eng.</option>
+              </select>
+              <select id="subjects-filter-year" class="filter-select" onchange="loadSubjects()">
+                <option value="All">All Years</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+            </div>
+            <button class="btn btn-primary" onclick="navigateTo('add-subject')">
+              <span>➕</span> Add New Subject
+            </button>
+          </div>
+
+          <div class="card-panel">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Subject Code</th>
+                    <th>Subject Title</th>
+                    <th>Department</th>
+                    <th>Year / Sem</th>
+                    <th>Credits</th>
+                    <th>Faculty In-Charge</th>
+                    <th>Sessions Marked</th>
+                    <th>Avg Attendance</th>
+                    <th style="text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="subjects-table-body">
+                  <tr><td colspan="9" style="text-align: center; color: var(--text-muted); padding: 32px;">Loading subjects...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 8: ADD SUBJECT
+             ============================================================== -->
+        <div id="view-add-subject" class="view-container">
+          <div class="form-card">
+            <div class="form-header-bar">
+              <div>
+                <h2 class="form-header-title">Create New Subject</h2>
+                <p class="form-help-text">Add a curriculum course to the college course catalogue.</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="navigateTo('subjects')">← Back to Subjects</button>
+            </div>
+
+            <form id="form-add-subject" onsubmit="handleCreateSubject(event)">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="add-subject-code">Subject Code <span class="required-star">*</span></label>
+                  <input type="text" id="add-subject-code" class="form-input" placeholder="e.g. CS504" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-subject-name">Subject Name / Title <span class="required-star">*</span></label>
+                  <input type="text" id="add-subject-name" class="form-input" placeholder="e.g. Operating Systems" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-subject-dept">Department <span class="required-star">*</span></label>
+                  <select id="add-subject-dept" class="form-select" required>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Electronics & Comm.">Electronics & Comm.</option>
+                    <option value="Mechanical Eng.">Mechanical Eng.</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-subject-year">Academic Year <span class="required-star">*</span></label>
+                  <select id="add-subject-year" class="form-select" required>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3" selected>3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-subject-sem">Semester <span class="required-star">*</span></label>
+                  <select id="add-subject-sem" class="form-select" required>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5" selected>Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="add-subject-credits">Course Credits</label>
+                  <input type="number" id="add-subject-credits" class="form-input" value="3" min="1" max="8">
+                </div>
+
+                <div class="form-group col-span-2">
+                  <label class="form-label" for="add-subject-faculty">Faculty In-Charge / Professor</label>
+                  <input type="text" id="add-subject-faculty" class="form-input" placeholder="e.g. Dr. Jane Goodall">
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="navigateTo('subjects')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save Subject</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 9: EDIT SUBJECT
+             ============================================================== -->
+        <div id="view-edit-subject" class="view-container">
+          <div class="form-card">
+            <div class="form-header-bar">
+              <div>
+                <h2 class="form-header-title">Edit Subject</h2>
+                <p class="form-help-text">Modify course details, faculty assignment, or credits.</p>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="navigateTo('subjects')">← Back to Subjects</button>
+            </div>
+
+            <form id="form-edit-subject" onsubmit="handleUpdateSubject(event)">
+              <input type="hidden" id="edit-subject-id">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="edit-subject-code">Subject Code <span class="required-star">*</span></label>
+                  <input type="text" id="edit-subject-code" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-subject-name">Subject Name <span class="required-star">*</span></label>
+                  <input type="text" id="edit-subject-name" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-subject-dept">Department <span class="required-star">*</span></label>
+                  <select id="edit-subject-dept" class="form-select" required>
+                    <option value="Computer Science">Computer Science</option>
+                    <option value="Information Technology">Information Technology</option>
+                    <option value="Electronics & Comm.">Electronics & Comm.</option>
+                    <option value="Mechanical Eng.">Mechanical Eng.</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-subject-year">Academic Year <span class="required-star">*</span></label>
+                  <select id="edit-subject-year" class="form-select" required>
+                    <option value="1">1st Year</option>
+                    <option value="2">2nd Year</option>
+                    <option value="3">3rd Year</option>
+                    <option value="4">4th Year</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-subject-sem">Semester <span class="required-star">*</span></label>
+                  <select id="edit-subject-sem" class="form-select" required>
+                    <option value="1">Semester 1</option>
+                    <option value="2">Semester 2</option>
+                    <option value="3">Semester 3</option>
+                    <option value="4">Semester 4</option>
+                    <option value="5">Semester 5</option>
+                    <option value="6">Semester 6</option>
+                    <option value="7">Semester 7</option>
+                    <option value="8">Semester 8</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label" for="edit-subject-credits">Course Credits</label>
+                  <input type="number" id="edit-subject-credits" class="form-input" min="1" max="8">
+                </div>
+
+                <div class="form-group col-span-2">
+                  <label class="form-label" for="edit-subject-faculty">Faculty In-Charge</label>
+                  <input type="text" id="edit-subject-faculty" class="form-input">
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" onclick="navigateTo('subjects')">Cancel</button>
+                <button type="submit" class="btn btn-primary">Update Subject</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 10: ATTENDANCE HUB
+             ============================================================== -->
+        <div id="view-attendance" class="view-container">
+          <div class="controls-bar">
+            <div class="controls-left">
+              <button class="btn btn-primary" onclick="navigateTo('mark-attendance')">
+                <span>✏️</span> Take Class Attendance
+              </button>
+              <button class="btn btn-secondary" onclick="navigateTo('attendance-history')">
+                <span>🕒</span> Browse Complete History
+              </button>
+              <button class="btn btn-secondary" onclick="navigateTo('reports')">
+                <span>📈</span> View Reports
+              </button>
+            </div>
+          </div>
+
+          <!-- Today's / Recent Activity Summary -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h2 class="panel-title">📅 Live Attendance Overview</h2>
+                <span class="panel-subtitle">Review recent attendance session records</span>
+              </div>
+              <div style="display: flex; gap: 8px;">
+                <input type="date" id="att-hub-filter-date" class="form-input" style="padding: 6px 10px; font-size: 13px;" onchange="loadAttendanceHub()">
+                <select id="att-hub-filter-status" class="filter-select" style="padding: 6px 10px; font-size: 13px;" onchange="loadAttendanceHub()">
+                  <option value="All">All Statuses</option>
+                  <option value="Present">Present Only</option>
+                  <option value="Absent">Absent Only</option>
+                  <option value="Late">Late Only</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Student Name & Reg No</th>
+                    <th>Department</th>
+                    <th>Subject</th>
+                    <th>Attendance Status</th>
+                    <th>Remarks</th>
+                    <th style="text-align: right;">Action</th>
+                  </tr>
+                </thead>
+                <tbody id="att-hub-table-body">
+                  <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">Loading attendance records...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 11: MARK ATTENDANCE (Interactive Class Session)
+             ============================================================== -->
+        <div id="view-mark-attendance" class="view-container">
+          <!-- Class Session Selector -->
+          <div class="session-selector-card">
+            <div class="session-selector-grid">
+              <div class="form-group">
+                <label class="form-label" for="mark-att-date">Session Date <span class="required-star">*</span></label>
+                <input type="date" id="mark-att-date" class="form-input" required>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="mark-att-subject">Subject Course <span class="required-star">*</span></label>
+                <select id="mark-att-subject" class="form-select" onchange="handleSubjectSelectionChange()" required>
+                  <option value="">-- Choose Subject --</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Subject Details</label>
+                <div id="mark-att-sub-info" style="font-size: 13px; color: var(--text-muted); padding: 10px; background: var(--bg-main); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+                  Select a subject to load students
+                </div>
+              </div>
+
+              <div>
+                <button type="button" class="btn btn-primary" onclick="loadClassStudentsForMarking()">
+                  <span>👥</span> Load Student Roster
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Interactive Attendance Sheet -->
+          <div class="card-panel" id="mark-sheet-panel" style="display: none;">
+            <div class="attendance-sheet-header">
+              <div>
+                <h3 class="panel-title" id="mark-sheet-title">Class Roster</h3>
+                <span class="panel-subtitle" id="mark-sheet-subtitle">Click status pills to mark attendance for each student.</span>
+              </div>
+              <div class="bulk-actions-group">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="bulkMarkAll('Present')">
+                  ✅ Mark All Present
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="bulkMarkAll('Absent')">
+                  ❌ Mark All Absent
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">#</th>
+                    <th>Student Name & Reg No</th>
+                    <th>Department & Year</th>
+                    <th style="width: 220px;">Attendance Status</th>
+                    <th>Remarks (Optional)</th>
+                  </tr>
+                </thead>
+                <tbody id="mark-sheet-table-body">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="panel-header" style="background-color: #f8fafc; border-top: 1px solid var(--border-color); justify-content: flex-end;">
+              <button type="button" class="btn btn-success" style="padding: 12px 24px; font-size: 15px;" onclick="submitClassAttendance()">
+                <span>💾</span> Save & Submit Attendance
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 12: ATTENDANCE HISTORY
+             ============================================================== -->
+        <div id="view-attendance-history" class="view-container">
+          <div class="controls-bar">
+            <div class="controls-left">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="history-search" placeholder="Search student name, roll no, subject..." oninput="debounce(loadAttendanceHistory, 300)()">
+              </div>
+              <input type="date" id="history-filter-date" class="form-input" style="width: 160px;" onchange="loadAttendanceHistory()">
+              <select id="history-filter-subject" class="filter-select" onchange="loadAttendanceHistory()">
+                <option value="All">All Subjects</option>
+              </select>
+              <select id="history-filter-status" class="filter-select" onchange="loadAttendanceHistory()">
+                <option value="All">All Statuses</option>
+                <option value="Present">Present</option>
+                <option value="Absent">Absent</option>
+                <option value="Late">Late</option>
+              </select>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="clearHistoryFilters()">
+              Reset Filters
+            </button>
+          </div>
+
+          <div class="card-panel">
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Student Name & Reg No</th>
+                    <th>Department</th>
+                    <th>Subject Code & Title</th>
+                    <th>Status</th>
+                    <th>Remarks</th>
+                    <th style="text-align: right;">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="history-table-body">
+                  <tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 32px;">Loading attendance history...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 13: REPORTS & ANALYTICS
+             ============================================================== -->
+        <div id="view-reports" class="view-container">
+          <div class="controls-bar">
+            <div class="controls-left">
+              <div class="search-box">
+                <span class="search-icon">🔍</span>
+                <input type="text" id="reports-search" placeholder="Search student name or roll no..." oninput="debounce(loadReports, 300)()">
+              </div>
+              <select id="reports-filter-dept" class="filter-select" onchange="loadReports()">
+                <option value="All">All Departments</option>
+                <option value="Computer Science">Computer Science</option>
+                <option value="Information Technology">Information Technology</option>
+                <option value="Electronics & Comm.">Electronics & Comm.</option>
+                <option value="Mechanical Eng.">Mechanical Eng.</option>
+              </select>
+              <select id="reports-filter-year" class="filter-select" onchange="loadReports()">
+                <option value="All">All Years</option>
+                <option value="1">1st Year</option>
+                <option value="2">2nd Year</option>
+                <option value="3">3rd Year</option>
+                <option value="4">4th Year</option>
+              </select>
+              <select id="reports-filter-eligibility" class="filter-select" onchange="loadReports()">
+                <option value="All">All Students</option>
+                <option value="Shortage">Shortage (&lt;75% Only)</option>
+                <option value="Eligible">Eligible (≥75% Only)</option>
+              </select>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary" onclick="window.print()">
+                <span>🖨️</span> Print / Export
+              </button>
+            </div>
+          </div>
+
+          <!-- Report Summary Stat Cards -->
+          <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+            <div class="metric-card students">
+              <div class="metric-info">
+                <span class="metric-label">Assessed Students</span>
+                <span class="metric-value" id="rep-stat-total">0</span>
+                <span class="metric-sub">Across curriculum</span>
+              </div>
+              <div class="metric-icon-wrap">👨‍🎓</div>
+            </div>
+
+            <div class="metric-card attendance">
+              <div class="metric-info">
+                <span class="metric-label">Eligible Candidates</span>
+                <span class="metric-value" id="rep-stat-eligible" style="color: var(--success);">0</span>
+                <span class="metric-sub">≥ 75% attendance</span>
+              </div>
+              <div class="metric-icon-wrap">✅</div>
+            </div>
+
+            <div class="metric-card shortage">
+              <div class="metric-info">
+                <span class="metric-label">Shortage Defaulters</span>
+                <span class="metric-value" id="rep-stat-shortage" style="color: var(--danger);">0</span>
+                <span class="metric-sub">&lt; 75% exam warning</span>
+              </div>
+              <div class="metric-icon-wrap">⚠️</div>
+            </div>
+          </div>
+
+          <!-- Comprehensive Academic Report Table -->
+          <div class="card-panel">
+            <div class="panel-header">
+              <div>
+                <h3 class="panel-title">📋 Student Attendance & Exam Eligibility Register</h3>
+                <span class="panel-subtitle">Official calculated college attendance rates</span>
+              </div>
+            </div>
+            <div class="table-responsive">
+              <table class="custom-table">
+                <thead>
+                  <tr>
+                    <th>Student Name & Reg No</th>
+                    <th>Department</th>
+                    <th>Subject Course</th>
+                    <th>Conducted</th>
+                    <th>Attended</th>
+                    <th>Absent</th>
+                    <th>Attendance %</th>
+                    <th>Exam Status</th>
+                  </tr>
+                </thead>
+                <tbody id="reports-table-body">
+                  <tr><td colspan="8" style="text-align: center; color: var(--text-muted); padding: 32px;">Loading attendance reports...</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==============================================================
+             PAGE 14: SETTINGS & DATABASE MANAGEMENT
+             ============================================================== -->
+        <div id="view-settings" class="view-container">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 24px;">
+            <!-- College Information Settings -->
+            <div class="card-panel">
+              <div class="panel-header">
+                <h3 class="panel-title">🏛️ College & Academic Institution Settings</h3>
+              </div>
+              <div class="panel-body">
+                <form id="form-settings" onsubmit="handleSaveSettings(event)">
+                  <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label" for="setting-college-name">Institution Name</label>
+                    <input type="text" id="setting-college-name" class="form-input" required>
+                  </div>
+
+                  <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label" for="setting-college-code">College Code</label>
+                    <input type="text" id="setting-college-code" class="form-input">
+                  </div>
+
+                  <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label" for="setting-academic-year">Academic Year</label>
+                    <input type="text" id="setting-academic-year" class="form-input" placeholder="e.g. 2025 - 2026">
+                  </div>
+
+                  <div class="form-group" style="margin-bottom: 16px;">
+                    <label class="form-label" for="setting-current-sem">Current Semester Term</label>
+                    <input type="text" id="setting-current-sem" class="form-input" placeholder="e.g. Semester 5 (Odd Term)">
+                  </div>
+
+                  <div class="form-group" style="margin-bottom: 24px;">
+                    <label class="form-label" for="setting-min-att">Minimum Required Attendance % (Exam Eligibility)</label>
+                    <input type="number" id="setting-min-att" class="form-input" min="50" max="95" value="75">
+                    <span class="form-help-text">Standard university requirement is 75%.</span>
+                  </div>
+
+                  <button type="submit" class="btn btn-primary">Save Institution Settings</button>
+                </form>
+              </div>
+            </div>
+
+            <!-- Database & Sample Data Tools -->
+            <div class="card-panel">
+              <div class="panel-header">
+                <h3 class="panel-title">💾 Database & System Tools</h3>
+              </div>
+              <div class="panel-body">
+                <div style="margin-bottom: 20px;">
+                  <h4 style="font-size: 14px; font-weight: 700; margin-bottom: 6px;">Database Information</h4>
+                  <p style="font-size: 13px; color: var(--text-muted);">
+                    <strong>Engine:</strong> SQLite 3<br>
+                    <strong>Database Location:</strong> <code>database/attendance.db</code><br>
+                    <strong>Tables:</strong> <code>students</code>, <code>subjects</code>, <code>attendance</code>, <code>users</code>, <code>settings</code>
+                  </p>
+                </div>
+
+                <div style="padding: 16px; background-color: var(--danger-bg); border: 1px solid var(--danger-border); border-radius: var(--radius-md); margin-bottom: 20px;">
+                  <h4 style="font-size: 14px; font-weight: 700; color: var(--danger); margin-bottom: 6px;">Restore Default College Seed Data</h4>
+                  <p style="font-size: 12px; color: #991b1b; margin-bottom: 14px;">
+                    Resets the SQLite database and populates fresh sample students, engineering subjects, and authentic past attendance logs.
+                  </p>
+                  <button type="button" class="btn btn-danger btn-sm" onclick="confirmResetDatabase()">
+                    ⚠️ Reset & Reseed Database
+                  </button>
+                </div>
+
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.6;">
+                  <strong>Default Faculty & Admin Logins:</strong><br>
+                  • Admin: <code>admin</code> / <code>admin123</code><br>
+                  • Faculty: <code>faculty</code> / <code>faculty123</code>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- ==============================================================
+       MODALS (Delete Confirmation & Quick Record Edit)
+       ============================================================== -->
+  <!-- Delete Confirmation Modal -->
+  <div id="modal-delete" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-delete-title">Confirm Deletion</h3>
+        <button class="modal-close-btn" onclick="closeDeleteModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p id="modal-delete-message" style="color: var(--text-muted); font-size: 14px;">
+          Are you sure you want to delete this item? This action cannot be undone.
+        </p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+        <button class="btn btn-danger" id="modal-delete-confirm-btn">Delete Permanently</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Edit Attendance Record Modal -->
+  <div id="modal-edit-att" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Edit Attendance Record</h3>
+        <button class="modal-close-btn" onclick="closeEditAttModal()">&times;</button>
+      </div>
+      <form id="form-edit-att" onsubmit="handleSaveEditAttendance(event)">
+        <input type="hidden" id="edit-att-id">
+        <div class="modal-body">
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Student</label>
+            <input type="text" id="edit-att-student-name" class="form-input" readonly style="background: #f1f5f9;">
+          </div>
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Subject</label>
+            <input type="text" id="edit-att-sub-name" class="form-input" readonly style="background: #f1f5f9;">
+          </div>
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label">Date</label>
+            <input type="text" id="edit-att-date" class="form-input" readonly style="background: #f1f5f9;">
+          </div>
+          <div class="form-group" style="margin-bottom: 14px;">
+            <label class="form-label" for="edit-att-status">Attendance Status <span class="required-star">*</span></label>
+            <select id="edit-att-status" class="form-select" required>
+              <option value="Present">Present</option>
+              <option value="Absent">Absent</option>
+              <option value="Late">Late</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="edit-att-remarks">Remarks</label>
+            <input type="text" id="edit-att-remarks" class="form-input" placeholder="e.g. Excused, medical leave, late arrival">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeEditAttModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Record</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- APPLICATION SCRIPTS -->
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
